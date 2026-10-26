@@ -1,4 +1,3 @@
-
 export class StampManager {
     constructor(scene) {
         this.scene = scene;
