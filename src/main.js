@@ -2,7 +2,7 @@ import { Start } from './scenes/Start.js';
 
 const config = {
     type: Phaser.AUTO,
-    title: 'CMPM 120 Project Skeleton',
+    title: 'CMPM 170 Prototype Two (Passport)',
     description: '',
     parent: 'game-container',
     width: 1280,
