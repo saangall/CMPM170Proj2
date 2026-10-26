@@ -1,4 +1,5 @@
 import { MapOneData } from './MapData.js';
+import { StampManager } from './StampManager.js';
 export class Start extends Phaser.Scene {
 
     constructor() {
@@ -165,6 +166,9 @@ export class Start extends Phaser.Scene {
         // Informational Text Box
         this.informationalText = this.add.text(100,475 , "Text", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
         this.playerMoveInformation = this.add.text(100, 630, "Move Status : ", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
+
+        // Create the stamp system
+        this.stampManager = new StampManager(this);
     }
 
     update(time) {
@@ -263,6 +267,10 @@ export class Start extends Phaser.Scene {
         // Update move count, set occupancy grid
         player.movementCount = player.movementCount - 1;
         this.PlayerOccupancy[player.rowPosition][player.colPosition] = player.playerID;
+
+        // Check for stamp collection
+        this.stampManager.checkCollection(player);
+
         console.log("Player " + player.playerID + " Remaining Movement : " + player.movementCount);
 
         // If no movement left, switch turns
