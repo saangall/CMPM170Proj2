@@ -1,5 +1,6 @@
 import { MapOneData } from './MapData.js';
 import { StampManager } from './StampManager.js';
+import { Cloud } from './Cloud.js';
 export class Start extends Phaser.Scene {
 
     constructor() {
@@ -171,6 +172,9 @@ export class Start extends Phaser.Scene {
 
         // Controls and initial turn setting
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+        this.clouds = []; // Placed clouds, separate from permanent map tiles.
+        this.activeCloud = null; // Arrow keys control this cloud while placing it.
         this.roll = Math.floor(Math.random() * 6) + 1;
         this.player1.movementCount = this.roll;
 
@@ -180,6 +184,9 @@ export class Start extends Phaser.Scene {
         this.p2text = this.add.text(500, 475, "Text", { fontFamily: 'Arial', fontSize: '20px', color: '#ffffff' });
         this.playerMoveInformation = this.add.text(100, 20, "Move Status : ", { fontFamily: 'Arial', fontSize: '20px', color: '#ffffff' });
         this.warning = "";
+        this.weatherInformation = this.add.text(100, 670,
+            "Blue tile: create a 2x2 cloud. Arrows: aim. Enter: place anywhere on the map. Lasts 3 player turns.",
+            { fontFamily: 'Arial', fontSize: '18px', color: '#cbd5e1' });
 
         // Create the stamp system
         this.stampManager = new StampManager(this);
@@ -209,42 +216,31 @@ export class Start extends Phaser.Scene {
             + "\nWorld Position : (" + this.player2.rowPosition + ", " + this.player2.colPosition + ")"
             + "\n[Not Implemented] Visas : " + this.player2.visas);
 
-        // Controls
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
-            if (this.currentPlayerTurn == 1) {
-                this.makeMove(this.player1, this.player1.rowPosition, this.player1.colPosition - 1);
-            } else if (this.currentPlayerTurn == 2) {
-                this.makeMove(this.player2, this.player2.rowPosition, this.player2.colPosition - 1);
-            }
+        // Read the arrows once, then send movement to either the cloud or player.
+        let rowChange = 0;
+        let colChange = 0;
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) colChange = -1;
+        else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) colChange = 1;
+        else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) rowChange = 1;
+        else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) rowChange = -1;
+        const confirm = Phaser.Input.Keyboard.JustDown(this.enterKey);
+
+        if (this.activeCloud) {
+            this.activeCloud.move(rowChange, colChange);
+            if (confirm) this.confirmCloud();
+            return;
         }
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
-            if (this.currentPlayerTurn == 1) {
-                this.makeMove(this.player1, this.player1.rowPosition, this.player1.colPosition + 1);
-            } else if (this.currentPlayerTurn == 2) {
-                this.makeMove(this.player2, this.player2.rowPosition, this.player2.colPosition + 1);
-            }
-        }
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
-            if (this.currentPlayerTurn == 1) {
-                this.makeMove(this.player1, this.player1.rowPosition + 1, this.player1.colPosition);
-            }
-            else if (this.currentPlayerTurn == 2) {
-                this.makeMove(this.player2, this.player2.rowPosition + 1, this.player2.colPosition);
-            }
-        }
-        if (Phaser.Input.Keyboard.JustUp(this.cursors.up)) {
-            if (this.currentPlayerTurn == 1) {
-                this.makeMove(this.player1, this.player1.rowPosition - 1, this.player1.colPosition);
-            }
-            else if (this.currentPlayerTurn == 2) {
-                this.makeMove(this.player2, this.player2.rowPosition - 1, this.player2.colPosition);
-            }
+
+        if (rowChange !== 0 || colChange !== 0) {
+            const player = this.currentPlayerTurn === 1 ? this.player1 : this.player2;
+            this.makeMove(player, player.rowPosition + rowChange, player.colPosition + colChange);
         }
     }
 
     // Utility functions
 
     // Self explanatory
+    // one day this could be dice(numSides)
     D6() {
         this.roll = Math.floor(Math.random() * 6) + 1;
         this.playerMoveInformation.setText("Move Status : " + this.warning + " | Current Player Turn : " + (this.currentPlayerTurn === 1 ? this.player1.playerID : this.player2.playerID) + " | Movement Roll = " + this.roll + " | Amount of Moves Left : " + (this.currentPlayerTurn === 1 ? this.player1.movementCount : this.player2.movementCount));
@@ -252,10 +248,16 @@ export class Start extends Phaser.Scene {
     }
 
     makeMove(player, newRow, newCol) {
+        if (this.activeCloud) return;
         // Border, Obstacle, and Player Occupancy checks to block invalid moves
         if (newRow < 0 || newRow >= this.mapDimensions.height || newCol < 0 || newCol >= this.mapDimensions.width) return;
         if (this.MapDataGrid[newRow][newCol] == 2 || this.MapDataGrid[newRow][newCol] == 1 || this.MapDataGrid[newRow][newCol] == 7 || this.MapDataGrid[newRow][newCol] == 8) return;
         if (this.PlayerOccupancy[newRow][newCol] !== null) return;
+        if (this.hasCloud(newRow, newCol)) return;
+        // Travel cannot bypass a cloud at the destination.
+        const travelDestination = this.Destinations[newRow][newCol];
+        if (player.passport && travelDestination !== null &&
+            this.hasCloud(travelDestination[0], travelDestination[1])) return;
 
         // Interaction non-related to player movement
         if (this.MapDataGrid[newRow][newCol] == 12) player.passport = true;
@@ -301,8 +303,22 @@ export class Start extends Phaser.Scene {
 
         console.log("Player " + player.playerID + " Remaining Movement : " + player.movementCount);
 
+        // Start placement after updating the player, but before changing turns.
+        if (this.MapDataGrid[player.rowPosition][player.colPosition] === 5) {
+            this.placeCloud(player);
+            return;
+        }
+        this.finishMove(player);
+    }
+
+    finishMove(player) {
         // If no movement left, switch turns
         if (player.movementCount > 0) return;
+        this.clouds = this.clouds.filter(cloud => {
+            if (!cloud.advanceAge()) return true;
+            cloud.destroy();
+            return false;
+        });
         switch (this.currentPlayerTurn) {
             case 1:
                 this.currentPlayerTurn = 2;
@@ -320,5 +336,25 @@ export class Start extends Phaser.Scene {
                 console.log("Player 1 Dice Roll Outcome : " + this.player1.movementCount);*/
                 break;
         }
+    }
+
+    hasCloud(row, col) {
+        return this.clouds.some(cloud => cloud.covers(row, col));
+    }
+
+    placeCloud(player) {
+        this.activeCloud = new Cloud(this, player.rowPosition, player.colPosition);
+        this.warning = "ARROWS: AIM CLOUD; ENTER: PLACE";
+    }
+
+    confirmCloud() {
+        const cloud = this.activeCloud;
+        // Clouds can cover terrain, players, special tiles, and other clouds.
+        cloud.place();
+        this.clouds.push(cloud);
+        this.activeCloud = null;
+        this.warning = "";
+        const player = this.currentPlayerTurn === 1 ? this.player1 : this.player2;
+        this.finishMove(player);
     }
 }
