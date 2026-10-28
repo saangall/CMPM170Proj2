@@ -13,9 +13,9 @@ export class Start extends Phaser.Scene {
 
     create() {
         // strict map size
-        this.mapDimensions = { width: 14, height: 10, cellSize: 40};
+        this.mapDimensions = { width: 29, height: 10, cellSize: 40};
         // top left
-        this.mapCornerX = 100;
+        this.mapCornerX = 50;
         this.mapCornerY = 50;
         // draw initial grid graphics
         const graphics = this.add.graphics();
@@ -99,11 +99,17 @@ export class Start extends Phaser.Scene {
                         color = 0xf28955;
                         tileSize = this.mapDimensions.cellSize * 0.2;
                         break;
+                    // Pink Travel Point (Single Direction)
+                    case 11 :
+                        color = 0xFA86C4;
+                        tileSize = this.mapDimensions.cellSize * 0.2;
+                        break;
                     // Golden Passport Claim
                     case 12 : 
                         color = 0xffa408;
                         tileSize = this.mapDimensions.cellSize * 0.80;
                         break;
+
                 }
                 this.add.rectangle(
                 this.mapCornerX + col * this.mapDimensions.cellSize + this.mapDimensions.cellSize / 2,
@@ -160,12 +166,15 @@ export class Start extends Phaser.Scene {
 
         // Controls and initial turn setting
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.player1.movementCount = Math.floor(Math.random() * 6 + 1);
+        this.roll = Math.floor(Math.random() * 6) + 1;
+        this.player1.movementCount = this.roll;
         
 
         // Informational Text Box
-        this.informationalText = this.add.text(100,475 , "Text", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
-        this.playerMoveInformation = this.add.text(100, 630, "Move Status : ", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
+        this.p1text = this.add.text(100,475 , "Text", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
+        this.p2text = this.add.text(500,475 , "Text", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
+        this.playerMoveInformation = this.add.text(100, 20, "Move Status : ", {fontFamily: 'Arial', fontSize: '20px', color: '#ffffff'});
+        this.warning = "";
 
         // Create the stamp system
         this.stampManager = new StampManager(this);
@@ -173,14 +182,27 @@ export class Start extends Phaser.Scene {
 
     update(time) {
         // Update Information Text Box
-        this.informationalText.setText(
-              "Current Player Turn : " + this.currentPlayerTurn
-            + "\nMovement Left : " + (this.currentPlayerTurn === 1 ? this.player1.movementCount : this.player2.movementCount)
-            + "\nPosition : (" + (this.currentPlayerTurn === 1 ? this.player1.rowPosition : this.player2.rowPosition) + ", " + (this.currentPlayerTurn === 1 ? this.player1.colPosition : this.player2.colPosition) + ")"
-            + "\nPassport Status : " + (this.currentPlayerTurn === 1 ? this.player1.passport : this.player2.passport) 
-            + "\nMoney : " + (this.currentPlayerTurn === 1 ? this.player1.money : this.player2.money)
-            + "\nVisas : " + (this.currentPlayerTurn === 1 ? this.player1.visas : this.player2.visas)
-            + "\nTest Map Point : " + (this.MapDataGrid[7][9]));
+        this.playerMoveInformation.setText("Move Status : "  +  this.warning + " | Current Player Turn : " + (this.currentPlayerTurn === 1 ? this.player1.playerID : this.player2.playerID) + " | Movement Roll = " + this.roll +  " | Amount of Moves Left : " + (this.currentPlayerTurn === 1 ? this.player1.movementCount : this.player2.movementCount));
+        this.p1text.setText(
+
+              "Player 1 Passport/Information " + "\n-------------------------------------------"
+            + "\nPassport Status : " + (this.player1.passport ? "OBTAINED" : "UNOBTAINED")
+            // Stamps should display "Stamps : Contree, Lix Leveny" if a stamp from each country is obtained. Check ID of tile in MapDataGrid the player is standing
+            // on during map collection to update this field, which you still need to add in the player objects.
+            + "\nStamps : "
+            + "\nMoney : " + this.player1.money
+            + "\nWorld Position : (" + this.player1.rowPosition + ", " + this.player1.colPosition + ")"
+            + "\n[Not Implemented] Visas : " + this.player1.visas);
+        this.p2text.setText(
+            
+              "Player 2 Passport/Information " + "\n-------------------------------------------"
+            + "\nPassport Status : " + (this.player2.passport ? "OBTAINED" : "UNOBTAINED")
+            // Stamps should display "Stamps : Contree, Lix Leveny" if a stamp from each country is obtained. Check ID of tile in MapDataGrid the player is standing
+            // on during map collection to update this field, which you still need to add in the player objects. [CONTREE IS ID 13, LIX LEVENY ARE ID'D AS NULL]
+            + "\nStamps : "
+            + "\nMoney : " + this.player2.money
+            + "\nWorld Position : (" + this.player2.rowPosition + ", " + this.player2.colPosition + ")"
+            + "\n[Not Implemented] Visas : " + this.player2.visas);
         
         // Controls
         if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
@@ -220,7 +242,9 @@ export class Start extends Phaser.Scene {
     // Self explanatory
     D6() 
     { 
-        return Math.floor(Math.random() * 6) + 1;
+        this.roll = Math.floor(Math.random() * 6) + 1;
+        this.playerMoveInformation.setText("Move Status : "  +  this.warning + " | Current Player Turn : " + (this.currentPlayerTurn === 1 ? this.player1.playerID : this.player2.playerID) + " | Movement Roll = " + this.roll +  " | Amount of Moves Left : " + (this.currentPlayerTurn === 1 ? this.player1.movementCount : this.player2.movementCount));
+        return this.roll;
     }
 
     makeMove(player, newRow, newCol){ 
@@ -245,7 +269,7 @@ export class Start extends Phaser.Scene {
                 player.rowPosition = destination[0];
                 player.colPosition = destination[1];
             } else {
-                this.playerMoveInformation.setText("Move Status : Player " + player.playerID + " You need a passport to use a travel point.")
+                this.warning = "NEED PASSPORT TO TRAVEL";
             }
         }
         
@@ -278,6 +302,7 @@ export class Start extends Phaser.Scene {
         switch (this.currentPlayerTurn) { 
             case 1 : 
                 this.currentPlayerTurn = 2;
+                this.warning = "";
                 this.player2.movementCount = this.D6();
                 /*console.log("Player 1 X : " + this.player1.colPosition + " | Player 1 Y : " + this.player1.rowPosition);
                 console.log("Player 2 Dice Roll Outcome : " + this.player2.movementCount);
@@ -285,6 +310,7 @@ export class Start extends Phaser.Scene {
                 break;
             case 2 :
                 this.currentPlayerTurn = 1;
+                this.warning = "";
                 this.player1.movementCount = this.D6();
                 /*console.log("Player 2 X : " + this.player2.colPosition + " | Player 2 Y : " + this.player2.rowPosition);
                 console.log("Player 1 Dice Roll Outcome : " + this.player1.movementCount);*/
