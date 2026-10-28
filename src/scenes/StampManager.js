@@ -17,8 +17,8 @@ export class StampManager {
 
         // Display each player's stamp count
         this.stampText = this.scene.add.text(
-            720, 100,
-            "Player 1 Stamps : 0\nPlayer 2 Stamps : 0",
+            900, 475,
+            "Player 1 Stamp Count : 0\nPlayer 2 Stamp Count : 0",
             {
                 fontFamily: 'Arial',
                 fontSize: '20px',
@@ -48,7 +48,8 @@ export class StampManager {
                 for (let r = row; r < row + 2; r++) {
                     for (let c = col; c < col + 2; c++) {
 
-                        if (this.scene.MapDataGrid[r][c] !== null || this.scene.PlayerOccupancy[r][c] !== null) {
+                        if ((this.scene.MapDataGrid[r][c] !== null && this.scene.MapDataGrid[r][c] !== 13) ||
+                            this.scene.PlayerOccupancy[r][c] !== null) {
                             valid = false;
                         }
                     }

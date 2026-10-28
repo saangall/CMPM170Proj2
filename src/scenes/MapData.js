@@ -1,23 +1,51 @@
 
 // Y[ROW], X[COLUMN], TILE ID, DESTINATION [if applicable]
 // Each list object is data for one tile. Only tiles with something on it need data.
-export const MapOneData = [[0,0,7],[0,1,7],[0,2,7],[0,3,7],[0,4,7],[0,5,7],[0,6,7],[0,7,7],[0,8,7],[0,9,7],[0,10,7],[0,11,7],[0,13,7],
+export const MapOneData = [// contree data
+                           [0,0,7],[0,1,7],[0,2,7],[0,3,7],[0,4,7],[0,5,7],[0,6,7],[0,7,7],[0,8,7],[0,9,7],[0,10,7],[0,11,7],[0,13,7],
                            [1,0,7],[1,1,7],[1,5,7],[1,9,7],[1,13,7],[2,0,7],[2,12,7],[2,13,7],[3,13,7],[5,0,7],[5,12,7],[6,0,7],[6,11,7],[6,12,7],
                            [6,13,7],[7,0,7],[7,1,7],[7,8,7],[7,10,7],[7,11,7],[8,0,7],[8,4,7],[8,8,7],[8,9,7],[8,10,7],[8,11,7],[8,13,7],
                            [9,0,7],[9,1,7],[9,4,7],[9,5,7],[9,7,7],[9,8,7],[9,9,7],[9,10,7],[9,11,7],[9,13,7], [1,6,8], [1,7,8],[2,6,8],[3,5,8],
-                           [3,6,8],[4,6,8],[6,7,8],[6,8,8],[7,6,8],[7,7,8],[8,7,8],[7,9,10,[7,12]], [7,12,10,[7,9]], [3,8,12]];
-
+                           [3,6,8],[4,6,8],[6,7,8],[6,8,8],[7,6,8],[7,7,8],[8,7,8],[7,9,10,[7,12]], [7,12,10,[7,9]], [3,8,12],[9,12,11,[9,18]],
+                            // empty spaces contree
+                           [1,12,13],[1,2,13],[1,3,13],[1,4,13],[1,8,13],[1,13,13],[1,12,13],[1,11,13],[1,10,13],
+                           [2,1,13],[2,2,13],[2,3,13],[2,4,13],[2,5,13],[2,7,13],[2,8,13],[2,9,13],[2,10,13],[2,11,13],
+                           [3,0,13],[3,1,13],[3,2,13],[3,3,13],[3,4,13],[3,7,13],[3,9,13],[3,10,13],[3,11,13],[3,12,13],
+                           [4,0,13],[4,1,13],[4,2,13],[4,3,13],[4,4,13],[4,5,13],[4,7,13],[4,8,13],[4,9,13],[4,10,13],[4,11,13],[4,12,13],[4,13,13],
+                           [5,1,13],[5,2,13],[5,3,13],[5,4,13],[5,5,13],[5,6,13],[5,7,13],[5,8,13],[5,9,13],[5,10,13],[5,11,13],[5,13,13],
+                           [6,1,13],[6,2,13],[6,3,13],[6,4,13],[6,5,13],[6,6,13],[6,9,13],[6,10,13],
+                           [7,2,13],[7,3,13],[7,4,13],[7,5,13],[7,13,13],
+                           [8,1,13],[8,2,13],[8,3,13],[8,5,13],[8,6,13],[8,1,13],[8,12,13],
+                           [9,2,13],[9,3,13],[9,6,13],
+                            // lix leveny data
+                           [0,14,7],[0,15,7],[0,16,7],[0,17,7],[0,18,7],[0,19,7],[0,20,7],[0,21,7],[0,22,7],[0,23,7],[0,24,7],[0,25,7],[0,26,7],[0,27,7],[0,28,7],
+                           [1,14,7],[1,15,7],[1,16,7],[1,17,7],[1,18,7],[1,19,7],[1,20,7],[1,21,7],[1,22,7],[1,23,7],[1,24,7],[1,25,7],[1,26,7],[1,27,7],[1,28,7],
+                           [2,14,7],[2,18,7],[2,19,7],[2,20,7],[2,21,7],[2,22,7],[2,23,8],[2,26,7],[2,27,7],[2,28,7],
+                           [3,14,7],[3,20,11,[1,13]],[3,21,7],[3,22,8],[3,23,8],[3,28,7],
+                           [4,14,7],[4,28,7],
+                           [5,14,7],[5,27,7],[5,28,7],
+                           [6,14,7],[6,24,8],[6,25,8],[6,27,7],[6,28,7],
+                           [7,14,7],[7,16,8],[7,19,8],[7,20,8],[7,25,8],[7,26,7],[7,27,7],[7,28,7],
+                           [8,14,7],[8,15,7],[8,16,7],[8,20,8],[8,21,8],[8,23,7],[8,24,7],[8,25,7],[8,26,7],[8,27,7],[8,28,7],
+                           [9,14,7],[9,15,7],[9,16,7],[9,20,7],[9,21,7],[9,22,7],[9,23,7],[9,24,7],[9,25,7],[9,26,7],[9,27,7],[9,28,7]
+                           // lix leveny empty spaces are just null
+                        
+                        ];
+        // Note : If you're trying to spawn new items (money or weather at the time of writing), make sure you count both null spaces and ID 13 as valid.
+        // Feel free to overwrite them as needed
         // TILE IDs
         // 1 --> player 1 // DO NOT ADD TO DATA
         // 2 --> player 2 // DO NOT ADD TO DATA
-        // 3 --> player 3 implemented if time permits 
-        // 4 --> collectable stamp // Needs spawning mechanics and implementation
-        // 5 --> collectible weather item // Needs spawning mechanics and implementation
-        // 6 --> collectible money location // Needs spawning mechanics and implementation
-        // 7 --> permanent obstacles [water] // -> Implemented for Map One <-
-        // 8 --> permanent obstacles [mountain] // -> Implemented for Map One <-
-        // 9 --> impermanent obstacles  // Tied to weather item [5]
-        // 10 --> back and forth transport space // -> Implemented for Map One <-
-        // 11 --> single destination transport space // Needs implementation
-        // 12 --> passport claim location // -> Implemented for Map One <- ( will probably only be in map one )
+        // 3 --> player 3                                   SCRAPPED
+        // 4 --> collectable stamp                          ID 4 UNUSED, SPAWNED OTHER WAY
+        // 5 --> collectible weather item                   NEEDS IMPLEMENTATION
+        // 6 --> collectible money location                 NEEDS IMPLEMENTATION
+        // 7 --> permanent obstacles [water]                IMPLEMENTED
+        // 8 --> permanent obstacles [mountain]             IMPLEMENTED
+        // 9 --> impermanent obstacles                      Tied to weather item [5]
+        // 10 --> back and forth transport space            IMPLEMENTED -> Implemented for Map One <-
+        // 11 --> single destination transport space        NEEDS IMPLEMENTATION
+        // 12 --> passport claim location                   IMPLEMENTED -> Implemented for Map One <- ( will probably only be in map one )
+        // 13 --> Contree Empty Space                       IMPLEMENTED
+        // NULL --> Lix Leveny Empty Space                  IMPLEMENTED
 
