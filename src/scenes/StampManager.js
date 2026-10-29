@@ -145,6 +145,17 @@ export class StampManager {
                 " collected a stamp!"
             );
 
+            if(this.scene.MapDataGrid[player.rowPosition][player.colPosition] == 13) {
+                if(!player.countriesCollected.includes("Countree")){
+                    player.countriesCollected.unshift("Countree");
+                }
+            }
+            if(this.scene.MapDataGrid[player.rowPosition][player.colPosition] == null) {
+                if(!player.countriesCollected.includes(" Lix Leveny")){
+                    player.countriesCollected.push(" Lix Leveny");
+                }
+            }
+
             // Respawn the stamp
             this.spawnStamp();
         }

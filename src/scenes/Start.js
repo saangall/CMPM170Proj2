@@ -136,7 +136,8 @@ export class Start extends Phaser.Scene {
             visas: ["Contree"],
             hasTurn: false,
             movementCount: 0,
-            money: 0
+            money: 0,
+            countriesCollected: []
         }
 
         this.player2 = {
@@ -147,7 +148,8 @@ export class Start extends Phaser.Scene {
             visas: ["Contree"],
             hasTurn: false,
             movementCount: 0,
-            money: 0
+            money: 0,
+            countriesCollected: []
         }
 
         this.currentPlayerTurn = 1;
@@ -201,7 +203,7 @@ export class Start extends Phaser.Scene {
             + "\nPassport Status : " + (this.player1.passport ? "OBTAINED" : "UNOBTAINED")
             // Stamps should display "Stamps : Contree, Lix Leveny" if a stamp from each country is obtained. Check ID of tile in MapDataGrid the player is standing
             // on during map collection to update this field, which you still need to add in the player objects.
-            + "\nStamps : "
+            + "\nStamps : " + this.player1.countriesCollected
             + "\nMoney : " + this.player1.money
             + "\nWorld Position : (" + this.player1.rowPosition + ", " + this.player1.colPosition + ")"
             + "\n[Not Implemented] Visas : " + this.player1.visas);
@@ -211,7 +213,7 @@ export class Start extends Phaser.Scene {
             + "\nPassport Status : " + (this.player2.passport ? "OBTAINED" : "UNOBTAINED")
             // Stamps should display "Stamps : Contree, Lix Leveny" if a stamp from each country is obtained. Check ID of tile in MapDataGrid the player is standing
             // on during map collection to update this field, which you still need to add in the player objects. [CONTREE IS ID 13, LIX LEVENY ARE ID'D AS NULL]
-            + "\nStamps : "
+            + "\nStamps : " + this.player2.countriesCollected
             + "\nMoney : " + this.player2.money
             + "\nWorld Position : (" + this.player2.rowPosition + ", " + this.player2.colPosition + ")"
             + "\n[Not Implemented] Visas : " + this.player2.visas);
