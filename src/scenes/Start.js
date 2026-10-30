@@ -200,6 +200,28 @@ export class Start extends Phaser.Scene {
             "Blue tile: create a 2x2 cloud. Arrows: aim. Enter: place anywhere on the map. Lasts 3 player turns. \nPlayer 1 : Arrow Key Movement | Player 2 : WASD Movement",
 
             { fontFamily: 'Arial', fontSize: '18px', color: '#cbd5e1' });
+        
+        // Button to show or hide instructions
+        this.instructionsButton = this.add.text(100, 630, "Hide Instructions", {
+            fontFamily: 'Arial',
+            fontSize: '18px',
+            color: '#ffffff',
+            backgroundColor: '#444444',
+            padding: { x: 10, y: 5 }
+        });
+
+        this.instructionsButton.setInteractive({ useHandCursor: true });
+
+        // Toggle instructions when clicked
+        this.instructionsButton.on('pointerdown', () => {
+            if (this.weatherInformation.visible) {
+                this.weatherInformation.setVisible(false);
+                this.instructionsButton.setText("Show Instructions");
+                } else {
+                this.weatherInformation.setVisible(true);
+                this.instructionsButton.setText("Hide Instructions");
+            }
+        });
 
         // Create the stamp system
         this.stampManager = new StampManager(this);

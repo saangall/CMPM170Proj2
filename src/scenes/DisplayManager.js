@@ -11,7 +11,7 @@ export class DisplayManager {
         this.scene.playerMoveInformation.setColor(Phaser.Display.Color.IntegerToColor(currentColor).rgba);
         this.scene.movesLeftInformation.setColor(Phaser.Display.Color.IntegerToColor(currentColor).rgba);
         this.scene.movesLeftInformation2.setColor(Phaser.Display.Color.IntegerToColor(currentColor).rgba);
-        this.scene.playerMoveInformation.setText("CURRENT PLAYER TURN : " + (this.currentPlayerTurn === 1 ? "1" : "2"));
+        this.scene.playerMoveInformation.setText("CURRENT PLAYER TURN : " + (this.scene.currentPlayerTurn === 1 ? "1" : "2"));
         this.scene.movesLeftInformation.setText((this.scene.currentPlayerTurn === 1 ? this.scene.player1.movementCount : this.scene.player2.movementCount));
         this.scene.p1text.setText(
 
