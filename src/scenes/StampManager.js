@@ -16,15 +16,6 @@ export class StampManager {
         this.stamp.setDepth(5);
 
         // Display each player's stamp count
-        this.stampText = this.scene.add.text(
-            900, 475,
-            "Player 1 Stamp Count : 0\nPlayer 2 Stamp Count : 0",
-            {
-                fontFamily: 'Arial',
-                fontSize: '20px',
-                color: '#ffffff'
-            }
-        );
 
         // Spawn the first stamp away from the players at the start of the game
         this.spawnStamp(true);
@@ -132,12 +123,6 @@ export class StampManager {
 
             // Add a stamp to the player
             player.stamps += 1;
-
-            // Update stamp counter
-            this.stampText.setText(
-                "Player 1 Stamps : " + this.scene.player1.stamps +
-                "\nPlayer 2 Stamps : " + this.scene.player2.stamps
-            );
 
             // Show collection message
             this.scene.playerMoveInformation.setText(

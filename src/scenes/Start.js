@@ -1,6 +1,7 @@
 import { MapOneData } from './MapData.js';
 import { StampManager } from './StampManager.js';
 import { Cloud } from './Cloud.js';
+import { DisplayManager } from './DisplayManager.js';
 export class Start extends Phaser.Scene {
 
     constructor() {
@@ -13,9 +14,8 @@ export class Start extends Phaser.Scene {
     }
 
     create() {
-        // strict map size
+        // map information
         this.mapDimensions = { width: 29, height: 10, cellSize: 40 };
-        // top left
         this.mapCornerX = 50;
         this.mapCornerY = 50;
         // draw initial grid graphics
@@ -61,10 +61,7 @@ export class Start extends Phaser.Scene {
             }
         }
 
-        // Player occupancy grid mask to keep players from occupying/passing the same spot
-        // It's a separate grid because tracking it in MapDataGrid would override permanent interactable ID's
-        // Sorry for the amount of grids. This should be as many grids as needed. (Unless we implement map 2)
-        // Maybe we can just make the main grid bigger and keep both 'maps' in the same grid? upvotes: 1 downvotes: 0
+        // Player occupancy grid mask
         this.PlayerOccupancy = [];
         for (let row = 0; row < this.mapDimensions.height; row++) {
             this.PlayerOccupancy[row] = [];
@@ -110,7 +107,7 @@ export class Start extends Phaser.Scene {
                         color = 0xffa408;
                         tileSize = this.mapDimensions.cellSize * 0.80;
                         break;
-                    // weather item 
+                    // Blue Weather Item 
                     case 5:
                         color = 0x204fff;
                         tileSize = this.mapDimensions.cellSize * 0.60;
@@ -133,11 +130,13 @@ export class Start extends Phaser.Scene {
             rowPosition: 4,
             colPosition: 1,
             passport: false,
+            stamps : 0,
             visas: ["Contree"],
             hasTurn: false,
             movementCount: 0,
             money: 0,
-            countriesCollected: []
+            countriesCollected: [],
+            color : 0x66FF00
         }
 
         this.player2 = {
@@ -145,23 +144,24 @@ export class Start extends Phaser.Scene {
             rowPosition: 5,
             colPosition: 1,
             passport: false,
+            sttamps : 0,
             visas: ["Contree"],
             hasTurn: false,
             movementCount: 0,
             money: 0,
-            countriesCollected: []
+            countriesCollected: [],
+            color : 0xFF000D
         }
 
         this.currentPlayerTurn = 1;
 
-        // add players [P1 - White] [P2 - Gray]
         this.PlayerOccupancy[this.player2.rowPosition][this.player2.colPosition] = 2;
         this.icon2 = this.add.rectangle(
             this.mapCornerX + this.player2.colPosition * this.mapDimensions.cellSize + this.mapDimensions.cellSize / 2,
             this.mapCornerY + this.player2.rowPosition * this.mapDimensions.cellSize + this.mapDimensions.cellSize / 2,
             this.mapDimensions.cellSize * 0.5,
             this.mapDimensions.cellSize * 0.5,
-            0x808080
+            this.player2.color
         )
         this.PlayerOccupancy[this.player1.rowPosition][this.player1.colPosition] = 1;
         this.icon1 = this.add.rectangle(
@@ -169,11 +169,17 @@ export class Start extends Phaser.Scene {
             this.mapCornerY + this.player1.rowPosition * this.mapDimensions.cellSize + this.mapDimensions.cellSize / 2,
             this.mapDimensions.cellSize * 0.5,
             this.mapDimensions.cellSize * 0.5,
-            0xffffff
+            this.player1.color
         )
 
         // Controls and initial turn setting
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.wasd = this.input.keyboard.addKeys({
+            W: Phaser.Input.Keyboard.KeyCodes.W,
+            A: Phaser.Input.Keyboard.KeyCodes.A,
+            S: Phaser.Input.Keyboard.KeyCodes.S,
+            D: Phaser.Input.Keyboard.KeyCodes.D
+        });
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.clouds = []; // Placed clouds, separate from permanent map tiles.
         this.activeCloud = null; // Arrow keys control this cloud while placing it.
@@ -182,50 +188,45 @@ export class Start extends Phaser.Scene {
 
 
         // Informational Text Box
-        this.p1text = this.add.text(100, 475, "Text", { fontFamily: 'Arial', fontSize: '20px', color: '#ffffff' });
-        this.p2text = this.add.text(500, 475, "Text", { fontFamily: 'Arial', fontSize: '20px', color: '#ffffff' });
-        this.playerMoveInformation = this.add.text(100, 20, "Move Status : ", { fontFamily: 'Arial', fontSize: '20px', color: '#ffffff' });
+        this.p1text = this.add.text(100, 475, "Text", { fontFamily: 'Arial', fontSize: '20px', color: '#66FF00' });
+        this.p2text = this.add.text(500, 475, "Text", { fontFamily: 'Arial', fontSize: '20px', color: '#FF000D' });
+        this.playerMoveInformation = this.add.text(900, 475, "Move Status : ", { fontFamily: 'Arial', fontSize: '20px', fontWeight: "bold", color: '#ffffff' });
+        this.movesLeftInformation = this.add.text(1010,500, "5", {fontFamily : 'Arial', fontSize: '60px', color: '#ffffff'});
+        this.movesLeftInformation2 = this.add.text(940,570, "MOVES LEFT", {fontFamily : 'Arial', fontSize: '30px', color: '#ffffff'});
+
+        // --> --> --> --> Might want to make this information accessible via a button, and make warnings a popup when they're needed (like need a passport) <-- <-- <-- <--
         this.warning = "";
         this.weatherInformation = this.add.text(100, 670,
-            "Blue tile: create a 2x2 cloud. Arrows: aim. Enter: place anywhere on the map. Lasts 3 player turns.",
+            "Blue tile: create a 2x2 cloud. Arrows: aim. Enter: place anywhere on the map. Lasts 3 player turns. \nPlayer 1 : Arrow Key Movement | Player 2 : WASD Movement",
+
             { fontFamily: 'Arial', fontSize: '18px', color: '#cbd5e1' });
 
         // Create the stamp system
         this.stampManager = new StampManager(this);
+        this.displayManager = new DisplayManager(this);
     }
 
     update(time) {
-        // Update Information Text Box
-        this.playerMoveInformation.setText("Move Status : " + this.warning + " | Current Player Turn : " + (this.currentPlayerTurn === 1 ? this.player1.playerID : this.player2.playerID) + " | Movement Roll = " + this.roll + " | Amount of Moves Left : " + (this.currentPlayerTurn === 1 ? this.player1.movementCount : this.player2.movementCount));
-        this.p1text.setText(
-
-            "Player 1 Passport/Information " + "\n-------------------------------------------"
-            + "\nPassport Status : " + (this.player1.passport ? "OBTAINED" : "UNOBTAINED")
-            // Stamps should display "Stamps : Contree, Lix Leveny" if a stamp from each country is obtained. Check ID of tile in MapDataGrid the player is standing
-            // on during map collection to update this field, which you still need to add in the player objects.
-            + "\nStamps : " + this.player1.countriesCollected
-            + "\nMoney : " + this.player1.money
-            + "\nWorld Position : (" + this.player1.rowPosition + ", " + this.player1.colPosition + ")"
-            + "\n[Not Implemented] Visas : " + this.player1.visas);
-        this.p2text.setText(
-
-            "Player 2 Passport/Information " + "\n-------------------------------------------"
-            + "\nPassport Status : " + (this.player2.passport ? "OBTAINED" : "UNOBTAINED")
-            // Stamps should display "Stamps : Contree, Lix Leveny" if a stamp from each country is obtained. Check ID of tile in MapDataGrid the player is standing
-            // on during map collection to update this field, which you still need to add in the player objects. [CONTREE IS ID 13, LIX LEVENY ARE ID'D AS NULL]
-            + "\nStamps : " + this.player2.countriesCollected
-            + "\nMoney : " + this.player2.money
-            + "\nWorld Position : (" + this.player2.rowPosition + ", " + this.player2.colPosition + ")"
-            + "\n[Not Implemented] Visas : " + this.player2.visas);
-
+        // Moved display texts to this class
+        this.displayManager.updateInformation();
         // Read the arrows once, then send movement to either the cloud or player.
         let rowChange = 0;
         let colChange = 0;
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) colChange = -1;
-        else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) colChange = 1;
-        else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) rowChange = 1;
-        else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) rowChange = -1;
-        const confirm = Phaser.Input.Keyboard.JustDown(this.enterKey);
+        let confirm = false;
+        if(this.currentPlayerTurn == 1){
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) colChange = -1;
+            else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) colChange = 1;
+            else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) rowChange = 1;
+            else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) rowChange = -1;
+            confirm = Phaser.Input.Keyboard.JustDown(this.enterKey);
+        }
+        if(this.currentPlayerTurn == 2){
+            if (Phaser.Input.Keyboard.JustDown(this.wasd.A)) colChange = -1;
+            else if (Phaser.Input.Keyboard.JustDown(this.wasd.D)) colChange = 1;
+            else if (Phaser.Input.Keyboard.JustDown(this.wasd.S)) rowChange = 1;
+            else if (Phaser.Input.Keyboard.JustDown(this.wasd.W)) rowChange = -1;
+            confirm = Phaser.Input.Keyboard.JustDown(this.enterKey);
+        }
 
         if (this.activeCloud) {
             this.activeCloud.move(rowChange, colChange);
@@ -245,7 +246,6 @@ export class Start extends Phaser.Scene {
     // one day this could be dice(numSides)
     D6() {
         this.roll = Math.floor(Math.random() * 6) + 1;
-        this.playerMoveInformation.setText("Move Status : " + this.warning + " | Current Player Turn : " + (this.currentPlayerTurn === 1 ? this.player1.playerID : this.player2.playerID) + " | Movement Roll = " + this.roll + " | Amount of Moves Left : " + (this.currentPlayerTurn === 1 ? this.player1.movementCount : this.player2.movementCount));
         return this.roll;
     }
 
@@ -303,8 +303,6 @@ export class Start extends Phaser.Scene {
         // Check for stamp collection
         this.stampManager.checkCollection(player);
 
-        console.log("Player " + player.playerID + " Remaining Movement : " + player.movementCount);
-
         // Start placement after updating the player, but before changing turns.
         if (this.MapDataGrid[player.rowPosition][player.colPosition] === 5) {
             this.placeCloud(player);
@@ -326,16 +324,11 @@ export class Start extends Phaser.Scene {
                 this.currentPlayerTurn = 2;
                 this.warning = "";
                 this.player2.movementCount = this.D6();
-                /*console.log("Player 1 X : " + this.player1.colPosition + " | Player 1 Y : " + this.player1.rowPosition);
-                console.log("Player 2 Dice Roll Outcome : " + this.player2.movementCount);
-                */
                 break;
             case 2:
                 this.currentPlayerTurn = 1;
                 this.warning = "";
                 this.player1.movementCount = this.D6();
-                /*console.log("Player 2 X : " + this.player2.colPosition + " | Player 2 Y : " + this.player2.rowPosition);
-                console.log("Player 1 Dice Roll Outcome : " + this.player1.movementCount);*/
                 break;
         }
     }

@@ -1,7 +1,7 @@
 
-// Y[ROW], X[COLUMN], TILE ID, DESTINATION [if applicable]
-// Each list object is data for one tile. Only tiles with something on it need data.
-export const MapOneData = [// contree data
+
+export const MapOneData = [
+   // contree data
    [0, 0, 7], [0, 1, 7], [0, 2, 7], [0, 3, 7], [0, 4, 7], [0, 5, 7], [0, 6, 7], [0, 7, 7], [0, 8, 7], [0, 9, 7], [0, 10, 7], [0, 11, 7], [0, 13, 7],
    [1, 0, 7], [1, 1, 7], [1, 5, 7], [1, 9, 7], [1, 13, 7], [2, 0, 7], [2, 12, 7], [2, 13, 7], [3, 13, 7], [5, 0, 7], [5, 12, 7], [6, 0, 7], [6, 11, 7], [6, 12, 7],
    [6, 13, 7], [7, 0, 7], [7, 1, 7], [7, 8, 7], [7, 10, 7], [7, 11, 7], [8, 0, 7], [8, 4, 7], [8, 8, 7], [8, 9, 7], [8, 10, 7], [8, 11, 7], [8, 13, 7],
@@ -29,23 +29,25 @@ export const MapOneData = [// contree data
    [8, 14, 7], [8, 15, 7], [8, 16, 7], [8, 20, 8], [8, 21, 8], [8, 23, 7], [8, 24, 7], [8, 25, 7], [8, 26, 7], [8, 27, 7], [8, 28, 7],
    [9, 14, 7], [9, 15, 7], [9, 16, 7], [9, 20, 7], [9, 21, 7], [9, 22, 7], [9, 23, 7], [9, 24, 7], [9, 25, 7], [9, 26, 7], [9, 27, 7], [9, 28, 7]
    // lix leveny empty spaces are just null
-
 ];
+
+// Y[ROW], X[COLUMN], TILE ID, DESTINATION [if applicable]
+// Each list object is data for one tile. Only tiles with something on it need data.
 // Note : If you're trying to spawn new items (money or weather at the time of writing), make sure you count both null spaces and ID 13 as valid.
 // Feel free to overwrite them as needed
 // TILE IDs
 // 1 --> player 1 // DO NOT ADD TO DATA
 // 2 --> player 2 // DO NOT ADD TO DATA
-// 3 --> player 3                                   SCRAPPED
-// 4 --> collectable stamp                          ID 4 UNUSED, SPAWNED OTHER WAY
-// 5 --> collectible weather item                   NEEDS IMPLEMENTATION
-// 6 --> collectible money location                 NEEDS IMPLEMENTATION
-// 7 --> permanent obstacles [water]                IMPLEMENTED
-// 8 --> permanent obstacles [mountain]             IMPLEMENTED
-// 9 --> impermanent obstacles                      Tied to weather item [5]
-// 10 --> back and forth transport space            IMPLEMENTED -> Implemented for Map One <-
-// 11 --> single destination transport space        NEEDS IMPLEMENTATION
-// 12 --> passport claim location                   IMPLEMENTED -> Implemented for Map One <- ( will probably only be in map one )
-// 13 --> Contree Empty Space                       IMPLEMENTED
-// NULL --> Lix Leveny Empty Space                  IMPLEMENTED
+// 3 --> player 3                                  
+// 4 --> collectable stamp                       
+// 5 --> collectible weather item                
+// 6 --> collectible money location              
+// 7 --> permanent obstacles [water]               
+// 8 --> permanent obstacles [mountain]            
+// 9 --> impermanent obstacles                     
+// 10 --> back and forth transport space          
+// 11 --> single destination transport space       
+// 12 --> passport claim location               
+// 13 --> Contree Empty Space                      
+// NULL --> Lix Leveny Empty Space                 
 
