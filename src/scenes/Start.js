@@ -272,6 +272,11 @@ export class Start extends Phaser.Scene {
     }
 
     makeMove(player, newRow, newCol) {
+        const passportWarning = this.add.text(360, 250, "Player " + player.playerID + " needs a passport to travel!", {
+            fontFamily: "Arial",
+            color: "#FFFFFF",
+            fontSize: "40px"
+        }).setVisible(false);
         if (this.activeCloud) return;
         // Border, Obstacle, and Player Occupancy checks to block invalid moves
         if (newRow < 0 || newRow >= this.mapDimensions.height || newCol < 0 || newCol >= this.mapDimensions.width) return;
@@ -299,6 +304,8 @@ export class Start extends Phaser.Scene {
                 player.rowPosition = destination[0];
                 player.colPosition = destination[1];
             } else {
+                passportWarning.setVisible(true);
+                this.time.delayedCall(2000, () => passportWarning.setVisible(false));
                 this.warning = "NEED PASSPORT TO TRAVEL";
             }
         }
