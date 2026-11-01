@@ -180,6 +180,7 @@ export class Start extends Phaser.Scene {
             S: Phaser.Input.Keyboard.KeyCodes.S,
             D: Phaser.Input.Keyboard.KeyCodes.D
         });
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.clouds = []; // Placed clouds, separate from permanent map tiles.
         this.activeCloud = null; // Arrow keys control this cloud while placing it.
@@ -197,7 +198,7 @@ export class Start extends Phaser.Scene {
         // --> --> --> --> Might want to make this information accessible via a button, and make warnings a popup when they're needed (like need a passport) <-- <-- <-- <--
         this.warning = "";
         this.weatherInformation = this.add.text(100, 670,
-            "Blue tile: create a 2x2 cloud. Arrows: aim. Enter: place anywhere on the map. Lasts 3 player turns. \nPlayer 1 : Arrow Key Movement | Player 2 : WASD Movement",
+            "Blue tile: create a 2x2 cloud. Arrows: aim. Enter: place anywhere on the map. Lasts 3 player turns. \nPlayer 1 : Arrow Key Movement | Player 2 : WASD Movement | Space Bar: End Turn",
 
             { fontFamily: 'Arial', fontSize: '18px', color: '#cbd5e1' });
         
@@ -241,6 +242,7 @@ export class Start extends Phaser.Scene {
             else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) rowChange = 1;
             else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) rowChange = -1;
             confirm = Phaser.Input.Keyboard.JustDown(this.enterKey);
+            
         }
         if(this.currentPlayerTurn == 2){
             if (Phaser.Input.Keyboard.JustDown(this.wasd.A)) colChange = -1;
@@ -260,6 +262,24 @@ export class Start extends Phaser.Scene {
             const player = this.currentPlayerTurn === 1 ? this.player1 : this.player2;
             this.makeMove(player, player.rowPosition + rowChange, player.colPosition + colChange);
         }
+
+        //Switches the player's turn when the space bar is pressed
+        if(Phaser.Input.Keyboard.JustDown(this.spaceKey)){
+            //Reusing Noah's code for this
+            switch (this.currentPlayerTurn) {
+            case 1:
+                this.currentPlayerTurn = 2;
+                this.warning = "";
+                this.player2.movementCount = this.D6();
+                break;
+            case 2:
+                this.currentPlayerTurn = 1;
+                this.warning = "";
+                this.player1.movementCount = this.D6();
+                break;
+        }
+        }
+
     }
 
     // Utility functions
@@ -337,6 +357,7 @@ export class Start extends Phaser.Scene {
             this.placeCloud(player);
             return;
         }
+
         this.finishMove(player);
     }
 
